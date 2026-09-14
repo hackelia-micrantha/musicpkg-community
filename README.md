@@ -47,4 +47,4 @@ See [`UPSTREAM.md`](UPSTREAM.md) for the promotion and provenance contract.
 
 ## License
 
-The published specification, documentation, schemas, and test vectors in this repository are licensed under Apache License 2.0. Public reference-code licensing is tracked separately because the existing private Rust reference core currently declares MPL-2.0; see issue #2.
+The published specification, documentation, schemas, and test vectors are licensed under Apache License 2.0. Reference implementation source is licensed under MPL-2.0 unless a file states otherwise. See [`LICENSES/README.md`](LICENSES/README.md) for the subtree and SPDX rules.
