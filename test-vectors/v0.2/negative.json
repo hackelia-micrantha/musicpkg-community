@@ -1,0 +1,155 @@
+{
+  "version": "musicpkg-v0.2-draft",
+  "cases": [
+    {
+      "id": "record-tag-bitflip",
+      "base": "crypto.json#/track_record",
+      "mutation": "flip bit 0 of final ciphertext_and_tag byte",
+      "expected": "AEAD_AUTH_FAILED"
+    },
+    {
+      "id": "record-wrong-index",
+      "base": "crypto.json#/track_record",
+      "mutation": "verify ciphertext with record_index=1 and corresponding nonce/AAD instead of 0",
+      "expected": "AEAD_AUTH_FAILED"
+    },
+    {
+      "id": "record-wrong-media-hash",
+      "base": "crypto.json#/track_record",
+      "mutation": "replace media_hash in AAD with 32 zero bytes",
+      "expected": "AEAD_AUTH_FAILED"
+    },
+    {
+      "id": "owner-envelope-wrong-recipient",
+      "base": "crypto.json#/owner_envelope_e1",
+      "mutation": "attempt HPKE open with any X25519 private key other than owner_o1.x25519_private",
+      "expected": "HPKE_OPEN_FAILED"
+    },
+    {
+      "id": "owner-envelope-context-change",
+      "base": "crypto.json#/owner_envelope_e1",
+      "mutation": "flip one bit in title_id inside owner-envelope context before HPKE open",
+      "expected": "HPKE_OPEN_FAILED"
+    },
+    {
+      "id": "h1-grant-wrong-device",
+      "base": "crypto.json#/device_grant_h1",
+      "mutation": "attempt HPKE open with P-256 private scalar 4 instead of vector scalar 3",
+      "expected": "HPKE_OPEN_FAILED"
+    },
+    {
+      "id": "h1-grant-owner-signature-bitflip",
+      "base": "crypto.json#/device_grant_h1",
+      "mutation": "flip bit 0 of owner_signature",
+      "expected": "OWNER_SIGNATURE_INVALID"
+    },
+    {
+      "id": "recovery-wrong-root",
+      "base": "crypto.json#/recovery_envelope",
+      "mutation": "derive K_recovery from RR with first byte changed",
+      "expected": "RECOVERY_AUTH_FAILED"
+    },
+    {
+      "id": "r1-wrong-passphrase",
+      "base": "crypto.json#/r1_bundle",
+      "mutation": "derive Argon2id key from UTF-8 NFC bytes of 'correct horse battery staple!'",
+      "expected": "RECOVERY_AUTH_FAILED"
+    },
+    {
+      "id": "ownership-proof-signature-bitflip",
+      "base": "crypto.json#/ownership_proof",
+      "mutation": "flip bit 0 of signature",
+      "expected": "OWNER_SIGNATURE_INVALID"
+    },
+    {
+      "id": "ownership-proof-replay-audience",
+      "base": "crypto.json#/ownership_proof",
+      "mutation": "change challenge audience without obtaining a new owner signature",
+      "expected": "OWNER_SIGNATURE_INVALID"
+    },
+    {
+      "id": "ownership-proof-replay-nonce",
+      "base": "crypto.json#/ownership_proof",
+      "mutation": "replace verifier nonce without obtaining a new owner signature",
+      "expected": "OWNER_SIGNATURE_INVALID"
+    },
+    {
+      "id": "publisher-signature-bitflip",
+      "base": "crypto.json#/publisher_cose_sign1",
+      "mutation": "flip bit 0 of COSE signature",
+      "expected": "ISSUER_SIGNATURE_INVALID"
+    },
+    {
+      "id": "publisher-payload-mutation",
+      "base": "crypto.json#/publisher_cose_sign1",
+      "mutation": "change package_id in payload without resigning",
+      "expected": "ISSUER_SIGNATURE_INVALID"
+    },
+    {
+      "id": "merkle-leaf-mutation",
+      "base": "crypto.json#/merkle_three_leaves",
+      "mutation": "change leaf 1 encoded data from ['record',1] to ['record',9] while retaining original proof/root",
+      "expected": "LEDGER_INCLUSION_INVALID"
+    },
+    {
+      "id": "duplicate-cbor-key",
+      "base": null,
+      "mutation": "construct otherwise-valid security-sensitive map containing integer key 2 twice",
+      "expected": "DUPLICATE_CBOR_KEY"
+    },
+    {
+      "id": "non-deterministic-cbor-integer",
+      "base": null,
+      "mutation": "encode integer 1 as 0x1801 in a security-sensitive object",
+      "expected": "NON_DETERMINISTIC_CBOR"
+    },
+    {
+      "id": "unknown-mandatory-profile",
+      "base": null,
+      "mutation": "replace a required profile ID with unrecognized value 65535",
+      "expected": "UNSUPPORTED_PROFILE"
+    },
+    {
+      "id": "zip-path-traversal",
+      "base": null,
+      "mutation": "add archive entry ../ownership/issuance.cose",
+      "expected": "UNSAFE_PATH"
+    },
+    {
+      "id": "zip-duplicate-path",
+      "base": null,
+      "mutation": "add two entries with exact UTF-8 logical path manifest/media.cbor",
+      "expected": "DUPLICATE_PATH"
+    },
+    {
+      "id": "checkpoint-threshold-short",
+      "base": null,
+      "mutation": "provide only 2 valid signatures for a validator set whose threshold is 3",
+      "expected": "CHECKPOINT_THRESHOLD_NOT_MET"
+    },
+    {
+      "id": "checkpoint-duplicate-validator",
+      "base": null,
+      "mutation": "count the same validator_id/signature twice toward threshold",
+      "expected": "VALIDATOR_SET_INVALID"
+    },
+    {
+      "id": "validator-rotation-hash-mismatch",
+      "base": null,
+      "mutation": "supply next validator-set whose CDE hash differs from previous checkpoint next_validator_set_hash",
+      "expected": "CHECKPOINT_CHAIN_INVALID"
+    },
+    {
+      "id": "stale-but-valid-current-title",
+      "base": null,
+      "mutation": "supply cryptographically valid current-title checkpoint older than verifier freshness policy",
+      "expected": "CHECKPOINT_STALE"
+    },
+    {
+      "id": "double-transfer",
+      "base": null,
+      "mutation": "submit second TRANSFER consuming an input_output_id already consumed in canonical state",
+      "expected": "TRANSFER_INPUT_SPENT"
+    }
+  ]
+}

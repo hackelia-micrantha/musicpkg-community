@@ -1,0 +1,205 @@
+{
+  "version": "musicpkg-v0.2-draft",
+  "scenarios": [
+    {
+      "id": "offline-existing-purchase",
+      "setup": [
+        "valid package",
+        "valid bundled issuance/checkpoint proof",
+        "valid owner or device authority",
+        "no network access"
+      ],
+      "expected": {
+        "playback": "allowed",
+        "current_title": "not_checked",
+        "error": "OK"
+      }
+    },
+    {
+      "id": "publisher-disappears",
+      "setup": [
+        "valid package and bundled evidence already held by consumer",
+        "publisher/retailer endpoints unavailable permanently",
+        "valid owner recovery/device authority"
+      ],
+      "expected": {
+        "playback": "allowed",
+        "migration": "allowed",
+        "recovery": "allowed",
+        "publisher_online_dependency": false
+      }
+    },
+    {
+      "id": "ledger-disappears",
+      "setup": [
+        "valid package and bundled historical checkpoint proof",
+        "all current ledger services unavailable"
+      ],
+      "expected": {
+        "playback": "allowed",
+        "historical_issuance": "valid",
+        "current_title": "unknown",
+        "new_transfer": "unavailable"
+      }
+    },
+    {
+      "id": "copied-package-no-authority",
+      "setup": [
+        "byte-for-byte copy of valid .musicpkg",
+        "no owner key",
+        "no valid device grant/private key",
+        "no recovery authority"
+      ],
+      "expected": {
+        "package_valid": true,
+        "playback": "denied",
+        "error": "KEY_NOT_HELD"
+      }
+    },
+    {
+      "id": "lost-device-surviving-owner-authority",
+      "setup": [
+        "old H1/S1 device lost",
+        "valid owner authority survives",
+        "replacement device creates new key pair"
+      ],
+      "expected": {
+        "new_device_grant": "allowed_without_publisher_or_ledger",
+        "old_grant_required": false,
+        "ownership_lost": false
+      }
+    },
+    {
+      "id": "total-device-loss-with-r1",
+      "setup": [
+        "all operational device grants lost",
+        "valid package backups",
+        "valid R1 recovery bundle",
+        "correct passphrase"
+      ],
+      "expected": {
+        "recover_rr": true,
+        "recover_owner_key": true,
+        "new_device_grant": true,
+        "publisher_required": false,
+        "ledger_required_for_playback_recovery": false
+      }
+    },
+    {
+      "id": "wrong-r1-passphrase",
+      "setup": [
+        "valid R1 bundle",
+        "incorrect passphrase"
+      ],
+      "expected": {
+        "recovery": "denied",
+        "error": "RECOVERY_AUTH_FAILED"
+      }
+    },
+    {
+      "id": "historical-owner-offline",
+      "setup": [
+        "valid historical ownership output and owner signature",
+        "no sufficiently fresh current ledger state"
+      ],
+      "expected": {
+        "historical_owner": "valid",
+        "current_title": "unknown",
+        "playback_if_local_authority_valid": "allowed"
+      }
+    },
+    {
+      "id": "current-owner-proof",
+      "setup": [
+        "fresh finalized checkpoint",
+        "current state inclusion proof for claimed title/output",
+        "fresh verifier nonce challenge",
+        "valid owner signature"
+      ],
+      "expected": {
+        "ownership_result": "CURRENT_OWNER_VALID"
+      }
+    },
+    {
+      "id": "canonical-transfer",
+      "setup": [
+        "A is current owner",
+        "transfer policy permits transfer",
+        "B provides fresh OwnerKeySet and acceptance",
+        "A creates E1 K_album envelope to B",
+        "A and B sign transfer body",
+        "transfer record finalizes"
+      ],
+      "expected": {
+        "A_current_title": false,
+        "B_current_title": true,
+        "title_id_preserved": true,
+        "package_id_preserved": true,
+        "media_reencrypted": false,
+        "publisher_participation_required": false
+      }
+    },
+    {
+      "id": "signed-transfer-not-final",
+      "setup": [
+        "A and B have signed a valid transfer proposal",
+        "record has not reached canonical finality"
+      ],
+      "expected": {
+        "B_current_title": false,
+        "result": "TRANSFER_NOT_FINAL"
+      }
+    },
+    {
+      "id": "double-transfer-race",
+      "setup": [
+        "two validly signed proposals consume same current output",
+        "one proposal finalizes first"
+      ],
+      "expected": {
+        "first_finalized": "current title",
+        "second": "TRANSFER_INPUT_SPENT",
+        "both_final": false
+      }
+    },
+    {
+      "id": "transfer-does-not-prove-erasure",
+      "setup": [
+        "A legitimately played/could have captured plaintext before transfer",
+        "canonical title later transfers to B"
+      ],
+      "expected": {
+        "B_current_title": true,
+        "protocol_claims_A_deleted_plaintext": false,
+        "protocol_claims_A_cannot_play_retained_plaintext": false
+      }
+    },
+    {
+      "id": "rekey-after-owner-key-compromise",
+      "setup": [
+        "current owner detects owner-key compromise",
+        "accepted recovery/old-owner authority satisfies REKEY policy",
+        "fresh OwnerKeySet created",
+        "new owner envelope created",
+        "REKEY record finalizes"
+      ],
+      "expected": {
+        "title_id_preserved": true,
+        "package_id_preserved": true,
+        "current_owner_key_replaced": true,
+        "media_reencrypted": false
+      }
+    },
+    {
+      "id": "vendor-policy-change-after-sale",
+      "setup": [
+        "valid completed purchase",
+        "publisher later changes business policy or stops supporting product"
+      ],
+      "expected": {
+        "ordinary_playback_revoked": false,
+        "network_renewal_required": false
+      }
+    }
+  ]
+}
