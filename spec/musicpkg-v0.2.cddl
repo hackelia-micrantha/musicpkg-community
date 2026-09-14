@@ -1,0 +1,399 @@
+; MUSICPKG Working Draft v0.2 CDDL
+; Security-sensitive maps use RFC 8949 core deterministic encoding.
+; Unknown fields are not permitted unless a future profile explicitly extends a structure.
+
+b4 = bstr .size 4
+b12 = bstr .size 12
+b16 = bstr .size 16
+b32 = bstr .size 32
+b48 = bstr .size 48
+b64 = bstr .size 64
+b65 = bstr .size 65
+b80 = bstr .size 80
+uint64 = 0..18446744073709551615
+
+; ---- Core identities / keys ----
+
+owner-key-set = {
+  1: 1,             ; profile O1
+  2: b32,           ; Ed25519 signing public key
+  3: b32            ; X25519 HPKE/KEM public key
+}
+
+issuer-key = {
+  1: 1,             ; profile I1
+  2: b32            ; Ed25519 public key
+}
+
+transfer-policy = {
+  1: bool,          ; transferable/giftable
+  2: bool,          ; inheritable
+  3: bool           ; reissuable
+}
+
+; ---- Media descriptor / content manifest ----
+
+media-descriptor = {
+  1: 1,             ; wire format version
+  2: b16,           ; package_id
+  3: b32,           ; asset_id
+  4: b32,           ; title_id
+  5: [+ track-descriptor],
+  ? 6: b32          ; watermark_descriptor_hash
+}
+
+track-descriptor = {
+  1: b16,           ; track_id; unique in package
+  2: "audio/flac", ; codec/media type
+  3: uint64,        ; plaintext byte length
+  4: 1048576,       ; maximum plaintext record size
+  5: uint,          ; record_count
+  6: tstr,          ; encrypted object path
+  7: tstr           ; record index path
+}
+
+track-index = {
+  1: 1,
+  2: b16,
+  3: [+ record-index-entry]
+}
+
+record-index-entry = [
+  record_index: uint64,
+  ciphertext_offset: uint64,
+  plaintext_offset: uint64,
+  plaintext_length: 1..1048576
+]
+
+content-manifest = {
+  1: 1,
+  2: b16,           ; package_id
+  3: b32,           ; SHA-256(media-descriptor bytes)
+  4: [+ object-reference]
+}
+
+object-reference = {
+  1: tstr,          ; archive path
+  2: b32,           ; SHA-256 exact object bytes
+  3: uint64         ; byte size
+}
+
+watermark-descriptor = {
+  1: 1,
+  2: uint,          ; watermark profile ID
+  3: b32,           ; watermark commitment
+  ? 4: uint,        ; expected payload/codeword bits
+  ? 5: uint         ; minimum evidence duration ms (profile guidance)
+}
+
+; ---- Publisher issuance ----
+
+issuance-payload = {
+  1: 1,
+  2: b16,           ; package_id
+  3: b32,           ; asset_id
+  4: b32,           ; title_id
+  5: b32,           ; content_manifest_hash
+  6: b32,           ; issuer_id
+  7: owner-key-set, ; initial owner
+  8: b32,           ; initial owner content-key envelope hash
+  9: transfer-policy,
+  10: b16,          ; ledger_id
+  11: b32,          ; ledger_genesis_hash
+  12: uint64,       ; issued_at Unix seconds, informational
+  ? 13: b32         ; watermark commitment
+}
+
+; Tagged COSE_Sign1. RFC text constrains protected headers and external AAD.
+cose-sign1 = #6.18([
+  protected: bstr,
+  unprotected: { * int => any },
+  payload: bstr / nil,
+  signature: bstr
+])
+
+; ---- Content-key envelopes ----
+
+owner-envelope = {
+  1: 1,
+  2: 1,             ; E1 = HPKE X25519/HKDF-SHA256/AES-256-GCM
+  3: owner-envelope-context,
+  4: b32,           ; RFC 9180 enc
+  5: b48            ; 32-byte K_album + 16-byte tag
+}
+
+owner-envelope-context = initial-envelope-context / transfer-envelope-context / rekey-envelope-context
+
+initial-envelope-context = {
+  1: 0,
+  2: b16,           ; package_id
+  3: b32,           ; title_id
+  4: b32,           ; content_manifest_hash
+  5: b32            ; owner_key_set_hash
+}
+
+transfer-envelope-context = {
+  1: 1,
+  2: b16,           ; package_id
+  3: b32,           ; title_id
+  4: b16,           ; transfer_id
+  5: b32,           ; input_output_id
+  6: b32            ; new_owner_key_set_hash
+}
+
+rekey-envelope-context = {
+  1: 2,
+  2: b16,           ; package_id
+  3: b32,           ; title_id
+  4: b16,           ; transition_id
+  5: b32,           ; input_output_id
+  6: b32            ; new_owner_key_set_hash
+}
+
+; ---- Purchaser recovery ----
+
+; O1 private material plaintext is exactly:
+;   Ed25519 32-byte seed || X25519 32-byte private key
+owner-private-material-o1 = b64
+
+recovery-envelope = {
+  1: 1,
+  2: b16,           ; package_id
+  3: b32,           ; title_id
+  4: b32,           ; owner_key_set_hash
+  5: b12,           ; AES-256-GCM nonce
+  6: b80            ; encrypted O1 private material + 16-byte tag
+}
+
+r1-recovery-bundle = {
+  1: 1,
+  2: 1,             ; profile R1
+  3: 2,             ; Argon2id
+  4: 19,            ; Argon2 version 0x13
+  5: b16,           ; salt
+  6: 65536,         ; memory KiB
+  7: 3,             ; iterations
+  8: 4,             ; lanes
+  9: b12,           ; AES-256-GCM nonce
+  10: b48           ; encrypted 32-byte RR + 16-byte tag
+}
+
+; ---- Device grants ----
+
+device-key-set-s1 = {
+  1: 1,             ; S1 software profile
+  2: b32            ; X25519 KEM public key
+}
+
+device-key-set-h1 = {
+  1: 2,             ; H1 commodity hardware profile
+  2: b65            ; P-256 uncompressed SEC1 KEM public key
+}
+
+device-key-set = device-key-set-s1 / device-key-set-h1
+
+device-grant-body = {
+  1: 1,
+  2: b16,           ; grant_id
+  3: b16,           ; package_id
+  4: b32,           ; title_id
+  5: b32,           ; owner_key_set_hash
+  6: device-key-set,
+  7: 1 / 2          ; 1=S1 HPKE X25519; 2=H1 HPKE P-256
+}
+
+device-grant = {
+  1: device-grant-body,
+  2: bstr,          ; HPKE enc: 32 bytes S1 or 65 bytes H1
+  3: b48,           ; encrypted K_album
+  4: b64            ; owner Ed25519 signature over grant signing input
+}
+
+; ---- Ledger validator objects ----
+
+validator = {
+  1: b16,           ; validator_id
+  2: b32            ; Ed25519 public key
+}
+
+validator-set = {
+  1: 1,
+  2: b16,           ; ledger_id
+  3: uint,          ; epoch
+  4: uint,          ; finalization threshold
+  5: [+ validator]  ; strictly sorted by validator_id
+}
+
+ledger-genesis = {
+  1: 1,
+  2: b16,           ; ledger_id
+  3: uint64,        ; created_at Unix seconds, informational
+  4: validator-set
+}
+
+validator-signature = [
+  validator_id: b16,
+  signature: b64
+]
+
+checkpoint-payload = {
+  1: 1,
+  2: b16,           ; ledger_id
+  3: uint64,        ; height
+  4: b32,           ; previous checkpoint_id; all-zero at height 0
+  5: b32,           ; cumulative records Merkle root
+  6: uint64,        ; cumulative records count
+  7: b32,           ; current-title state Merkle root
+  8: uint64,        ; current title output count
+  9: b32,           ; current validator_set_hash
+  10: uint,         ; protocol epoch
+  11: uint64,       ; timestamp Unix seconds, informational
+  ? 12: b32         ; next validator_set_hash, effective next height
+}
+
+checkpoint = {
+  1: checkpoint-payload,
+  2: [+ validator-signature] ; strictly sorted by validator_id
+}
+
+merkle-proof = {
+  1: 1,
+  2: uint64,        ; tree_size
+  3: uint64,        ; leaf_index
+  4: [* b32]        ; RFC 9162 audit path, bottom-up
+}
+
+validator-transition-proof = {
+  1: checkpoint,    ; finalized by old validator set; commits next set hash
+  2: validator-set  ; next set whose hash matches payload field 12
+}
+
+validator-proof-chain = [* validator-transition-proof]
+
+; ---- Ownership state ----
+
+ownership-output = {
+  1: 1,
+  2: b32,           ; output_id
+  3: b32,           ; asset_id
+  4: b32,           ; title_id
+  5: b16,           ; package_id
+  6: uint64,        ; title sequence
+  7: owner-key-set,
+  8: b32,           ; current owner-envelope hash
+  9: transfer-policy,
+  10: b32           ; producing ledger record hash
+}
+
+issue-record = {
+  1: 1,
+  2: 0,             ; ISSUE
+  3: b32,           ; asset_id
+  4: b32,           ; title_id
+  5: b16,           ; package_id
+  6: b32,           ; issuance.cose hash
+  7: owner-key-set,
+  8: b32,           ; initial owner-envelope hash
+  9: transfer-policy
+}
+
+transfer-body = {
+  1: 1,
+  2: b16,           ; transfer_id
+  3: b32,           ; input_output_id
+  4: b32,           ; asset_id
+  5: b32,           ; title_id
+  6: b16,           ; package_id
+  7: owner-key-set, ; new recipient
+  8: b32,           ; new owner-envelope hash
+  ? 9: b32          ; optional opaque settlement-reference hash
+}
+
+transfer-record = {
+  1: 1,
+  2: 1,             ; TRANSFER/GIFT
+  3: transfer-body,
+  4: b64,           ; current owner authorization
+  5: b64            ; recipient acceptance
+}
+
+inherit-record = {
+  1: 1,
+  2: 2,             ; INHERIT
+  3: transfer-body,
+  4: b64,           ; predecessor/recovery authorization under policy
+  5: b64            ; heir acceptance
+}
+
+reissue-body = {
+  1: 1,
+  2: b16,           ; transition_id
+  3: b32,           ; input_output_id
+  4: b32,           ; asset_id
+  5: b32,           ; title_id
+  6: b16,           ; new package_id
+  7: b32,           ; new publisher issuance hash
+  8: b32            ; new owner-envelope hash
+}
+
+reissue-record = {
+  1: 1,
+  2: 3,             ; REISSUE
+  3: reissue-body,
+  4: b64,           ; current owner authorization
+  5: b64            ; authorized reissuer/publisher signature
+}
+
+rekey-body = {
+  1: 1,
+  2: b16,           ; transition_id
+  3: b32,           ; input_output_id
+  4: b32,           ; asset_id
+  5: b32,           ; title_id
+  6: b16,           ; package_id
+  7: owner-key-set, ; fresh replacement owner key
+  8: b32,           ; new owner-envelope hash
+  9: uint            ; reason code
+}
+
+rekey-record = {
+  1: 1,
+  2: 4,             ; REKEY / RECOVER
+  3: rekey-body,
+  4: b64,           ; old owner or accepted recovery authority evidence
+  5: b64            ; new owner acceptance
+}
+
+ledger-record = issue-record / transfer-record / inherit-record / reissue-record / rekey-record
+
+; ---- Ownership verification ----
+
+ownership-challenge = {
+  1: 1,
+  2: uint,          ; purpose code
+  3: tstr,          ; verifier audience identifier
+  4: b32,           ; fresh random nonce
+  5: b32,           ; asset_id
+  6: b32,           ; title_id
+  7: b32,           ; claimed output_id
+  ? 8: b32,         ; checkpoint_id for current-title proof
+  ? 9: uint64,      ; issued_at
+  ? 10: uint64      ; expires_at
+}
+
+ownership-proof = {
+  1: 1,
+  2: ownership-challenge,
+  3: owner-key-set,
+  4: b64,           ; owner Ed25519 signature over proof signing input
+  ? 5: current-title-proof
+}
+
+current-title-proof = {
+  1: 1,
+  2: ownership-output,
+  3: merkle-proof,
+  4: checkpoint,
+  5: validator-set,
+  ? 6: validator-proof-chain
+}
