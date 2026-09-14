@@ -31,7 +31,7 @@ Published contracts do not silently change to match an implementation. If implem
 
 ## Status
 
-The current published target is **MUSICPKG v0.2 Working Draft**. The first community publication is being assembled from the reviewed v0.2 interoperability corpus and test vectors.
+The current public baseline is **MUSICPKG v0.2 Working Draft**, published from the reviewed v0.2 interoperability corpus. Start with [`rfcs/0000-musicpkg.md`](rfcs/0000-musicpkg.md), the normative [`spec/`](spec/) documents, and [`test-vectors/v0.2/`](test-vectors/v0.2/).
 
 ## Security model
 
@@ -43,8 +43,8 @@ It does **not** claim that a general-purpose endpoint can make plaintext or anal
 
 This repository is deliberately curated rather than blindly mirrored. Public interoperability contracts and fixtures are promoted here after review; private operational data, attack tooling, unpublished experiments, and sensitive implementation details remain outside the public surface.
 
-See `UPSTREAM.md` once the initial v0.2 publication lands for the promotion and provenance contract.
+See [`UPSTREAM.md`](UPSTREAM.md) for the promotion and provenance contract.
 
 ## License
 
-The community specification and reference material are intended to be published under Apache License 2.0.
+The published specification, documentation, schemas, and test vectors in this repository are licensed under Apache License 2.0. Public reference-code licensing is tracked separately because the existing private Rust reference core currently declares MPL-2.0; see issue #2.
