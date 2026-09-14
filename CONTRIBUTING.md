@@ -31,3 +31,10 @@ Implementation findings that contradict the current specification should be file
 ## Public/private boundary
 
 Do not submit private infrastructure, credentials, publisher operational data, unpublished attack corpora, customer data, or material copied from the private engineering repository unless it has been deliberately reviewed for public release.
+
+
+## Licensing
+
+Contributions to specifications, RFCs, schemas, fixtures, and documentation are accepted under Apache-2.0. Contributions to reference implementation source are accepted under MPL-2.0 unless the target file declares a different SPDX license identifier.
+
+Reference source files must carry `SPDX-License-Identifier: MPL-2.0`. Moving material between the private and public repositories is a publication decision, not an implicit relicensing event; copied source must retain its existing license unless an explicit relicensing review has been completed.
