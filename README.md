@@ -33,6 +33,8 @@ Published contracts do not silently change to match an implementation. If implem
 
 The current public baseline is **MUSICPKG v0.2 Working Draft**, published from the reviewed v0.2 interoperability corpus. Start with [`rfcs/0000-musicpkg.md`](rfcs/0000-musicpkg.md), the normative [`spec/`](spec/) documents, and [`test-vectors/v0.2/`](test-vectors/v0.2/).
 
+The evidence-aware [conformance report v2 contract](spec/conformance-report-v2.md) is also published. It separates **26 executable reference-implementation checks** from **23 specification/contract assertions** in the current private baseline. The public harness and reference-verifier implementation remain open work under [issue #3](https://github.com/hackelia-micrantha/musicpkg-community/issues/3); this specification publication alone does not make the public repository self-validating.
+
 ## Security model
 
 MUSICPKG aims to provide durable offline ownership, owner-controlled recovery and device enrollment, authentic publisher issuance, and meaningful resistance to trivial artifact redistribution without placing a publisher or service in the ordinary playback path.
