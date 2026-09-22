@@ -33,3 +33,11 @@ Public and private repositories are not bidirectional mirrors. Public contributi
 Published specifications, RFCs, schemas, conformance fixtures, and documentation are Apache-2.0. Public reference implementation source is MPL-2.0 unless an individual file declares another SPDX identifier.
 
 The existing private Rust `musicpkg-core` is MPL-2.0. Promotion may preserve that license; copying code into this repository does not relicense it under the repository's Apache-2.0 documentation/specification default. Normative behavior remains defined by the public specification and fixtures, not by the reference implementation.
+
+## Conformance report v2 publication — 2026-09-22
+
+- Private reviewed source: `hackelia-micrantha/musicpkg@b5d762e000b7a2c35f8cf458b56b4a7889648355`, `spec/conformance-report-v2.md` (blob `c4df128870a05a92148905f7e817f44879160ec8`).
+- Promoted artifact: `spec/conformance-report-v2.md`, an Apache-2.0 public report-format contract.
+- Verification: the private merged-main conformance gate passed in [run 35791608914](https://github.com/hackelia-micrantha/musicpkg/actions/runs/35791608914).
+- Public scope of this publication is the **report contract only**. It does not publish or claim independent public execution of the Rust reference harness, crypto/ledger verification, or product workflows. That implementation and its public-only CI remain tracked by #3.
+- The incompatible pre-merge `musicpkg-conformance-report-v1` draft was never promoted as a stable public interface.
