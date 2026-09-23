@@ -1,0 +1,20 @@
+[package]
+name = "musicpkg-core"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+
+[dependencies]
+aes-gcm = "0.10"
+argon2 = "0.5"
+hkdf = "0.12"
+hpke = { version = "0.14.1", default-features = false, features = ["alloc", "getrandom", "x25519", "nistp", "aes", "hkdfsha2"] }
+sha2 = "0.10"
+minicbor = { version = "0.26", features = ["std"] }
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+zeroize = "1"
+ed25519-dalek = "2"
+
+[dev-dependencies]
+serde_json = "1"
+hex = "0.4"

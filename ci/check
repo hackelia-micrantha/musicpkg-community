@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cargo fmt --all --check
+cargo test --workspace --locked
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
+report_file="${TMPDIR:-/tmp}/musicpkg-conformance-report.json"
+cargo run --locked -p musicpkg-conformance -- --fixtures test-vectors/v0.2 --json >"$report_file"
+REPORT_FILE="$report_file" python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+report = json.loads(Path(os.environ['REPORT_FILE']).read_text())
+summary = report['summary']
+expected = {
+    'total': 49,
+    'implementation_passed': 26,
+    'contract_assertions_passed': 23,
+    'implementation_mismatch': 0,
+    'contract_assertion_mismatch': 0,
+    'fixture_defect': 0,
+}
+if summary != expected:
+    raise SystemExit(f'unexpected conformance summary: {summary}')
+PY

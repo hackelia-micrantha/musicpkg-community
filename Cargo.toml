@@ -1,0 +1,3 @@
+[workspace]
+members = ["crates/musicpkg-core", "crates/musicpkg-conformance"]
+resolver = "2"
