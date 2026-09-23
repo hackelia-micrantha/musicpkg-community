@@ -33,7 +33,21 @@ Published contracts do not silently change to match an implementation. If implem
 
 The current public baseline is **MUSICPKG v0.2 Working Draft**, published from the reviewed v0.2 interoperability corpus. Start with [`rfcs/0000-musicpkg.md`](rfcs/0000-musicpkg.md), the normative [`spec/`](spec/) documents, and [`test-vectors/v0.2/`](test-vectors/v0.2/).
 
-The evidence-aware [conformance report v2 contract](spec/conformance-report-v2.md) is also published. It separates **26 executable reference-implementation checks** from **23 specification/contract assertions** in the current private baseline. The public harness and reference-verifier implementation remain open work under [issue #3](https://github.com/hackelia-micrantha/musicpkg-community/issues/3); this specification publication alone does not make the public repository self-validating.
+The [conformance report v2 contract](spec/conformance-report-v2.md) distinguishes **26 executable reference-implementation checks** from **23 specification/contract assertions** in the 49-check v0.2 corpus. The curated MPL-2.0 Rust reference core and harness run directly from this public repository; the implementation does not require the private repo or a Micrantha service.
+
+## Run public conformance
+
+With a current Rust toolchain (edition 2024, including rustfmt and Clippy), run from the repository root:
+
+```sh
+cargo run --locked -p musicpkg-conformance -- --fixtures test-vectors/v0.2
+cargo run --locked -p musicpkg-conformance -- --fixtures test-vectors/v0.2 --json
+./ci/check
+```
+
+The first command prints a human-readable summary, the second emits the [versioned v2 JSON result](spec/conformance-report-v2.md), and the third runs format checks, tests, Clippy, and the strict 49-check report gate. CI runs on a GitHub-hosted runner; it does **not** execute public pull-request code on a privileged self-hosted host. Builds may download locked crates.io dependencies; fixture evaluation itself needs no network or vendor service.
+
+**Evidence limit:** The 15 product/failure scenarios and 8 negative parser/ledger/state checks are contract assertions, not production parser, ownership-ledger, package-verification, or player tests. A full-file `musicpkg verify` command, complete ledger state, and end-to-end playback remain future implementation work. The public specs and fixtures—not the Rust implementation—define normative behavior. See [the harness README](crates/musicpkg-conformance/README.md) and [issue #3](https://github.com/hackelia-micrantha/musicpkg-community/issues/3) for outstanding verifier scope.
 
 ## Security model
 
