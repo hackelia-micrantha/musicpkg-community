@@ -6,6 +6,7 @@ use musicpkg_core::ids::issuer_id;
 use musicpkg_core::media::{
     derive_track_key, media_record_aad, media_record_nonce, open_media_record, seal_media_record,
 };
+use musicpkg_core::merkle::{leaf_hash, rfc9162_root};
 use musicpkg_core::owner::{OwnerKeySet, owner_key_set_hash};
 use musicpkg_core::recovery::{
     derive_r1_key, derive_recovery_key, open_r1_bundle, open_recovery_envelope, r1_aad,
@@ -15,7 +16,6 @@ use musicpkg_core::signatures::{
     device_grant_signing_input, ownership_proof_signing_input, verify_ed25519,
 };
 use serde_json::Value;
-use sha2::{Digest, Sha256};
 
 use crate::fixture::{self, FixtureError};
 use crate::report::{CaseResult, compared, fixture_defect};
@@ -290,34 +290,6 @@ fn check_publisher(v: &Value) -> Result<(), Failure> {
         &fixture::hex_at(v, "/publisher_cose_sign1/signature")?,
     )
     .map_err(|e| imp(e.to_string()))
-}
-
-pub(crate) fn leaf_hash(data: &[u8]) -> [u8; 32] {
-    let mut hasher = Sha256::new();
-    hasher.update([0u8]);
-    hasher.update(data);
-    hasher.finalize().into()
-}
-
-fn node_hash(left: &[u8; 32], right: &[u8; 32]) -> [u8; 32] {
-    let mut hasher = Sha256::new();
-    hasher.update([1u8]);
-    hasher.update(left);
-    hasher.update(right);
-    hasher.finalize().into()
-}
-
-pub(crate) fn rfc9162_root(leaves: &[Vec<u8>]) -> [u8; 32] {
-    match leaves.len() {
-        0 => Sha256::digest([]).into(),
-        1 => leaf_hash(&leaves[0]),
-        n => {
-            let split = 1usize << ((usize::BITS - (n - 1).leading_zeros() - 1) as usize);
-            let left = rfc9162_root(&leaves[..split]);
-            let right = rfc9162_root(&leaves[split..]);
-            node_hash(&left, &right)
-        }
-    }
 }
 
 fn check_merkle(v: &Value) -> Result<(), Failure> {

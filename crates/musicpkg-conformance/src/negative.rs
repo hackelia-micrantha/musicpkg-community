@@ -6,12 +6,12 @@ use musicpkg_core::cbor::{Error as CborError, validate_cde};
 use musicpkg_core::cose::verify_publisher_signature;
 use musicpkg_core::hpke_profile::{open_device_h1, open_owner_e1};
 use musicpkg_core::media::{Error as MediaError, open_media_record};
+use musicpkg_core::merkle::{Error as MerkleError, InclusionProof, verify_inclusion};
 use musicpkg_core::recovery::{open_r1_bundle, open_recovery_envelope};
 use musicpkg_core::signatures::{ownership_proof_signing_input, verify_ed25519};
 use serde_json::Value;
 
 use crate::fixture::{self, FixtureError};
-use crate::positive::rfc9162_root;
 use crate::report::{CaseResult, compared, fixture_defect};
 
 type MediaArgs = (Vec<u8>, Vec<u8>, Vec<u8>, u64, usize, Vec<u8>, Vec<u8>);
@@ -412,15 +412,41 @@ fn merkle_leaf_mutation(v: &Value) -> Result<&'static str, FixtureError> {
         .last_mut()
         .ok_or_else(|| FixtureError("empty merkle leaf 1".into()))?;
     *last = 9;
-    Ok(
-        if rfc9162_root(&leaves).as_slice()
-            != fixture::hex_at(v, "/merkle_three_leaves/root")?.as_slice()
-        {
-            "LEDGER_INCLUSION_INVALID"
-        } else {
-            "OK"
-        },
-    )
+    let leaf_hashes = fixture::req_array(v, "/merkle_three_leaves/leaf_hashes")?;
+    let left_value = leaf_hashes
+        .first()
+        .and_then(Value::as_str)
+        .ok_or_else(|| FixtureError("missing or invalid merkle leaf hash 0".into()))?;
+    let sibling_left: [u8; 32] = hex::decode(left_value)
+        .map_err(|e| FixtureError(format!("invalid merkle leaf hash 0 hex: {e}")))?
+        .try_into()
+        .map_err(|_| FixtureError("invalid merkle leaf hash 0 length".into()))?;
+    let right_value = leaf_hashes
+        .get(2)
+        .and_then(Value::as_str)
+        .ok_or_else(|| FixtureError("missing or invalid merkle leaf hash 2".into()))?;
+    let sibling_right: [u8; 32] = hex::decode(right_value)
+        .map_err(|e| FixtureError(format!("invalid merkle leaf hash 2 hex: {e}")))?
+        .try_into()
+        .map_err(|_| FixtureError("invalid merkle leaf hash 2 length".into()))?;
+    let root: [u8; 32] = fixture::hex_at(v, "/merkle_three_leaves/root")?
+        .try_into()
+        .map_err(|_| FixtureError("invalid merkle root length".into()))?;
+    let proof = InclusionProof {
+        tree_size: 3,
+        leaf_index: 1,
+        audit_path: vec![sibling_left, sibling_right],
+    };
+
+    Ok(match verify_inclusion(&leaves[1], &proof, &root) {
+        Err(MerkleError::RootMismatch) => "LEDGER_INCLUSION_INVALID",
+        Err(error) => {
+            return Err(FixtureError(format!(
+                "unexpected Merkle verifier error: {error}"
+            )));
+        }
+        Ok(()) => "OK",
+    })
 }
 
 fn profile_supported(id: u16) -> bool {
