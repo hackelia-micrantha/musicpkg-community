@@ -8,6 +8,7 @@ pub mod cbor;
 pub mod cose;
 pub mod hpke_profile;
 pub mod ids;
+pub mod merkle;
 pub mod owner;
 pub mod recovery;
 pub mod signatures;
