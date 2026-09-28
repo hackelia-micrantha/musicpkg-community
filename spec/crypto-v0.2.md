@@ -422,7 +422,7 @@ If checkpoint height `h` commits `next_validator_set_hash`, the next finalized c
 H(CDE(new_validator_set)) == old_checkpoint.next_validator_set_hash
 ```
 
-The wire verifier need not implement the deployment's BFT network protocol; it MUST verify finalized checkpoint signatures, threshold/quorum policy, hash-linked checkpoint history supplied in the proof chain, and validator-set transitions.
+The wire verifier need not implement the deployment's BFT network protocol; it MUST verify finalized checkpoint signatures, threshold/quorum policy, validator-set transitions, and any checkpoint links for which the immediately preceding verified checkpoint is supplied or available from a trusted cache. A `validator-proof-chain` establishes validator-set provenance; by itself it MUST NOT be described as a complete hash-linked checkpoint history.
 
 ## 14. Transition validity and output construction
 
