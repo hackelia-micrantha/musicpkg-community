@@ -17,7 +17,8 @@ Status: working interoperability vectors
 - R1 Argon2id + AES-256-GCM Recovery Root bundle;
 - ownership challenge Ed25519 signature;
 - publisher COSE_Sign1 Ed25519 Sig_structure/signature;
-- RFC 9162 three-leaf Merkle Tree Hash example.
+- RFC 9162 three-leaf Merkle Tree Hash example;
+- deterministic ledger ISSUE/TRANSFER record bytes, record hashes, output-ID domains, owner signatures, and sequence-0/1 ownership outputs in `ledger-state.json`.
 
 Private keys, deterministic HPKE ephemeral keys/scalars, Recovery Root values, nonces, and passphrases in these files are **test-only** and MUST NOT be reused in production.
 
@@ -33,9 +34,11 @@ The positive vector set was generated with independent standard primitive implem
 - owner/device Ed25519 signature verification;
 - publisher COSE Sig_structure Ed25519 verification.
 
-A reference implementation should reproduce the exact public/intermediate/output bytes in `crypto.json` from the provided deterministic vector inputs.
+A reference implementation should reproduce the exact public/intermediate/output bytes in `crypto.json` and `ledger-state.json` from the provided deterministic vector inputs.
 
 HPKE ephemeral private values are supplied only to make sender output deterministic for cross-implementation tests; production HPKE senders MUST generate ephemeral keys according to RFC 9180 requirements.
+
+`ledger-state.json` was generated independently from the Rust reference implementation using RFC 8949 deterministic-CBOR encoding plus standard Ed25519/X25519 primitives. It first reproduces the existing O1 key-set bytes from `crypto.json`, then derives the ISSUE record/output and signed TRANSFER record/output. The vector's private seeds are test-only.
 
 ## Negative vectors
 
