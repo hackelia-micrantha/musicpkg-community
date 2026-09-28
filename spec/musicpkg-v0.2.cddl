@@ -219,7 +219,7 @@ validator = {
 validator-set = {
   1: 1,
   2: b16,           ; ledger_id
-  3: uint,          ; epoch
+  3: uint,          ; validator-set rotation epoch; distinct from checkpoint protocol epoch
   4: uint,          ; finalization threshold
   5: [+ validator]  ; strictly sorted by validator_id
 }
@@ -246,7 +246,7 @@ checkpoint-payload = {
   7: b32,           ; current-title state Merkle root
   8: uint64,        ; current title output count
   9: b32,           ; current validator_set_hash
-  10: uint,         ; protocol epoch
+  10: uint,         ; MUSICPKG protocol epoch; checked against verifier policy, not validator-set epoch
   11: uint64,       ; timestamp Unix seconds, informational
   ? 12: b32         ; next validator_set_hash, effective next height
 }

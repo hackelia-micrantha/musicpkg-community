@@ -172,12 +172,14 @@ A finalized checkpoint verifier checks:
 - records root/count consistency with supplied proof;
 - state root/count for current-title proofs;
 - validator-set hash;
-- protocol epoch;
+- protocol epoch, checked against the verifier's accepted MUSICPKG protocol epoch/policy;
 - unique validator signatures;
 - threshold satisfaction;
 - validator-set transition proof when applicable.
 
 A wire verifier validates finalized evidence. It does not need to implement proposer election, networking, timeouts, or BFT voting transport.
+
+The checkpoint `protocol epoch` and the validator-set `epoch` are distinct values. Validator-set `epoch` identifies validator-set generation/rotation; checkpoint `protocol epoch` identifies the MUSICPKG protocol rules under which the checkpoint is interpreted. A verifier MUST check the checkpoint protocol epoch against an explicitly accepted protocol epoch/policy and MUST NOT infer it from, or require equality with, the validator-set epoch.
 
 ## 11. Validator sets
 
