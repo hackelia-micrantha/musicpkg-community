@@ -79,6 +79,8 @@ UNSUPPORTED_ISSUER_PROFILE
 
 Verify genesis/ledger identity, validator set/proof chain, finalized checkpoint signatures, threshold, record inclusion proof, ISSUE record, and package/owner/watermark commitments.
 
+`validator-proof-chain` proves validator-set provenance across rotations; it does not imply that omitted ordinary checkpoint links were supplied or verified. Check `previous_checkpoint_id` when the immediate predecessor evidence is present/cached, and only claim complete adjacent history when every link has been verified.
+
 Failure classes:
 
 ```text
