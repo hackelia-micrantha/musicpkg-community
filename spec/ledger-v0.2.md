@@ -168,7 +168,7 @@ At height 0, `previous_checkpoint_id` is 32 zero bytes. At height `h > 0`, it MU
 A finalized checkpoint verifier checks:
 
 - ledger ID;
-- checkpoint link;
+- checkpoint link when the immediately preceding verified checkpoint is supplied or available from a trusted cache;
 - records root/count consistency with supplied proof;
 - state root/count for current-title proofs;
 - validator-set hash;
@@ -178,6 +178,8 @@ A finalized checkpoint verifier checks:
 - validator-set transition proof when applicable.
 
 A wire verifier validates finalized evidence. It does not need to implement proposer election, networking, timeouts, or BFT voting transport.
+
+A standalone finalized checkpoint may be admitted from trusted validator-set provenance plus its signatures/quorum without carrying every earlier ordinary checkpoint. Such admission does **not** prove omitted `previous_checkpoint_id` links. A verifier MUST NOT claim a complete adjacent checkpoint history unless each link is checked against the immediately preceding verified checkpoint evidence.
 
 The checkpoint `protocol epoch` and the validator-set `epoch` are distinct values. Validator-set `epoch` identifies validator-set generation/rotation; checkpoint `protocol epoch` identifies the MUSICPKG protocol rules under which the checkpoint is interpreted. A verifier MUST check the checkpoint protocol epoch against an explicitly accepted protocol epoch/policy and MUST NOT infer it from, or require equality with, the validator-set epoch.
 
@@ -204,19 +206,22 @@ If checkpoint `h` commits `next_validator_set_hash`, the next validator set beco
 SHA-256(CDE(next_validator_set)) == checkpoint[h].next_validator_set_hash
 ```
 
-A historical proof crossing rotations includes an ordered `validator-proof-chain` of finalized old-set checkpoint + next-set objects.
+A historical proof crossing rotations includes an ordered `validator-proof-chain` of finalized old-set checkpoint + next-set objects. This chain proves **validator-set provenance**. Transition checkpoints need not be adjacent heights, and ordinary intervening checkpoints are not implicitly supplied by this structure.
 
 Verifier algorithm:
 
 ```text
 trusted_set = genesis.validator_set
 for transition in chain:
-    verify transition.checkpoint under trusted_set
-    require threshold finality
-    require H(CDE(transition.next_set)) == checkpoint.next_validator_set_hash
+    verify transition.checkpoint ledger/protocol/set binding under trusted_set
+    verify transition.checkpoint signatures and threshold
+    require H(CDE(transition.next_set)) == transition.checkpoint.next_validator_set_hash
     trusted_set = transition.next_set
-verify target checkpoint under trusted_set
+verify target checkpoint ledger/protocol/set binding under trusted_set
+verify target checkpoint signatures and threshold
 ```
+
+When the immediately preceding checkpoint is supplied or available from a trusted cache, the verifier also checks its `previous_checkpoint_id` adjacency. Absence of omitted ordinary checkpoints does not make an otherwise valid validator-set provenance chain invalid, but the verifier MUST NOT claim those omitted links were verified.
 
 An implementation may cache previously verified validator sets/checkpoints.
 
