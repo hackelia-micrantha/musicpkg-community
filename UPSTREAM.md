@@ -76,7 +76,7 @@ These vectors were intentionally produced independently of the Rust reference im
 
 Public PR #14 (`675fc610eb468bac47a06721c292e35034878bb0`) clarified that `validator-proof-chain` establishes validator-set provenance across rotations; it does not prove omitted ordinary checkpoint adjacency.
 
-The public contract is authoritative for this published behavior. Private implementation already follows the same trust boundary, and the private staging copies of the affected v0.2 specification text are being reconciled from this public source rather than redefining the public contract.
+The public contract is authoritative for this published behavior. Private implementation already follows the same trust boundary, and private PR #52 reconciled the affected v0.2 staging specification text from this public source, merging as `6b47f31cb96dea073f0fb8ba5f50aa2bdd0673fb`, rather than redefining the public contract.
 
 No wire/CDDL/vector or conformance-count change resulted.
 
