@@ -49,3 +49,39 @@ The existing private Rust `musicpkg-core` is MPL-2.0. Promotion may preserve tha
 - The three public fixture files have byte-identical Git blobs to that reviewed source: `crypto.json` `a8d92b99f2a43b6f9d17304ba5256205e84eaddb`, `negative.json` `6caad6f1cf7b8a2773e2fb4f3de6b259adffece8`, `scenarios.json` `fa79bb178c533643fad0bb66c74e10057f543a4b`. No private test vector, research corpus, privileged runner configuration, credential, or operational tooling was mirrored.
 - The public CI is an independent GitHub-hosted Cargo gate, intentionally not the private repository's Nix/JIT runner workflow. Source and fixture evaluation have no runtime private-repo or vendor-service dependency; fetching locked third-party Rust crates at build time may require ordinary internet access.
 - The public harness is a **reference conformance implementation**, not a normative protocol definition or a complete package verifier. Current evidence comprises 26 implementation checks plus 23 labeled contract assertions; `musicpkg verify`, parser, canonical ownership ledger, and playback are not claimed as implemented.
+## Subsequent reviewed public updates
+
+The initial publication snapshot above remains the provenance root for the v0.2 corpus. Later public changes are deliberately tracked by semantic origin rather than pretending the repositories are mirrors.
+
+### Protocol / validator epoch clarification
+
+Public PR #9 (`c473cb6709cec74415d772c02c860542ea2b5ed9`) clarified that checkpoint **protocol epoch** is verifier protocol policy and is distinct from validator-set rotation **epoch**. The private implementation consumed that published distinction in its checkpoint verifier before treating the corresponding implementation slice as complete.
+
+No CDDL, vector, or conformance-count change resulted.
+
+### RFC 9162 Merkle reference primitive
+
+Public PR #10 (`fe0faafd0b869f0590dea6f2ed4f4a13a743a974`) promoted the bounded RFC 9162 Merkle reference primitive after the equivalent private implementation slice had been reviewed and verified.
+
+The public conformance harness now executes the already-existing Merkle cases through the public reference core. Evidence accounting remains 26 executable checks / 23 contract assertions.
+
+### Independent ledger-state vectors
+
+Public PR #13 (`f98612c8e7feb91fafc4bcd7a4ec09469cb61d5c`) added independently generated `test-vectors/v0.2/ledger-state.json` ISSUE/TRANSFER/output vectors.
+
+These vectors were intentionally produced independently of the Rust reference implementation and are the public interoperability oracle for the private ownership-state implementation work. They do not by themselves establish complete ISSUE/TRANSFER admission, package verification, current-owner verification, or a conformance-count increase.
+
+### Validator proof-chain semantics
+
+Public PR #14 (`675fc610eb468bac47a06721c292e35034878bb0`) clarified that `validator-proof-chain` establishes validator-set provenance across rotations; it does not prove omitted ordinary checkpoint adjacency.
+
+The public contract is authoritative for this published behavior. Private implementation already follows the same trust boundary, and the private staging copies of the affected v0.2 specification text are being reconciled from this public source rather than redefining the public contract.
+
+No wire/CDDL/vector or conformance-count change resulted.
+
+### Post-v0.2 cryptographic survivability
+
+Private engineering work now contains a post-v0.2 migration design for replacing classical Ed25519/X25519/P-256 authority with future standardized or reviewed post-quantum/hybrid profiles while preserving the ownership product contract.
+
+That design is **not** a v0.2 publication. Public issue #15 is the bounded community tracking surface for future profile/version work; v0.2 bytes, algorithms, vectors, and conformance remain unchanged.
+

@@ -35,6 +35,12 @@ The current public baseline is **MUSICPKG v0.2 Working Draft**, published from t
 
 The [conformance report v2 contract](spec/conformance-report-v2.md) distinguishes **26 executable reference-implementation checks** from **23 specification/contract assertions** in the 49-check v0.2 corpus. The curated MPL-2.0 Rust reference core and harness run directly from this public repository; the implementation does not require the private repo or a Micrantha service.
 
+Since the initial harness publication, the public v0.2 corpus also includes [`test-vectors/v0.2/ledger-state.json`](test-vectors/v0.2/ledger-state.json): independently generated deterministic ISSUE/TRANSFER record, output-ID, signature, and ownership-output vectors. These are interoperability vectors, not evidence that package-level ownership-state APIs are implemented; the conformance accounting remains **26 executable checks / 23 contract assertions** until the corresponding public reference paths are promoted and reviewed.
+
+The published checkpoint contract also distinguishes validator-set provenance from checkpoint-history completeness: a `validator-proof-chain` proves trusted validator-set transitions across rotations, but it does not prove omitted ordinary `previous_checkpoint_id` links. Complete adjacent-history claims require each immediate predecessor link to be supplied or otherwise trusted and verified.
+
+Post-v0.2 cryptographic profile evolution is tracked in [issue #15](https://github.com/hackelia-micrantha/musicpkg-community/issues/15). That work intentionally does **not** change the v0.2 wire format, mandatory algorithms, vectors, or current conformance requirements.
+
 ## Run public conformance
 
 With a current Rust toolchain (edition 2024, including rustfmt and Clippy), run from the repository root:
