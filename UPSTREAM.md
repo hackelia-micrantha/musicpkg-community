@@ -46,9 +46,10 @@ The existing private Rust `musicpkg-core` is MPL-2.0. Promotion may preserve tha
 
 - Reviewed private implementation source: `hackelia-micrantha/musicpkg@b5d762e000b7a2c35f8cf458b56b4a7889648355` (the exact merged-main harness verification baseline).
 - Curated public source: `Cargo.toml`, `Cargo.lock`, `crates/musicpkg-core/`, `crates/musicpkg-conformance/`, and the portable `ci/check` command. The Rust crate manifests already declare MPL-2.0. Core Rust files acquired explicit `SPDX-License-Identifier: MPL-2.0` headers in this promotion without otherwise changing implementation behavior; the conformance source retained existing SPDX headers.
-- The three public fixture files have byte-identical Git blobs to that reviewed source: `crypto.json` `a8d92b99f2a43b6f9d17304ba5256205e84eaddb`, `negative.json` `6caad6f1cf7b8a2773e2fb4f3de6b259adffece8`, `scenarios.json` `fa79bb178c533643fad0bb66c74e10057f543a4b`. No private test vector, research corpus, privileged runner configuration, credential, or operational tooling was mirrored.
+- The three initially promoted public fixture files have byte-identical Git blobs to that reviewed source: `crypto.json` `a8d92b99f2a43b6f9d17304ba5256205e84eaddb`, `negative.json` `6caad6f1cf7b8a2773e2fb4f3de6b259adffece8`, `scenarios.json` `fa79bb178c533643fad0bb66c74e10057f543a4b`. No private test vector, research corpus, privileged runner configuration, credential, or operational tooling was mirrored.
 - The public CI is an independent GitHub-hosted Cargo gate, intentionally not the private repository's Nix/JIT runner workflow. Source and fixture evaluation have no runtime private-repo or vendor-service dependency; fetching locked third-party Rust crates at build time may require ordinary internet access.
 - The public harness is a **reference conformance implementation**, not a normative protocol definition or a complete package verifier. Current evidence comprises 26 implementation checks plus 23 labeled contract assertions; `musicpkg verify`, parser, canonical ownership ledger, and playback are not claimed as implemented.
+
 ## Subsequent reviewed public updates
 
 The initial publication snapshot above remains the provenance root for the v0.2 corpus. Later public changes are deliberately tracked by semantic origin rather than pretending the repositories are mirrors.
