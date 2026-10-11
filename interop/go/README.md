@@ -18,15 +18,17 @@ and `ledger-state.json`. It independently checks:
 - track HKDF-SHA256 derivation and AES-256-GCM media-record authentication;
 - O1 Ed25519/X25519 public keys and canonical owner-key-set hashes;
 - recovery-envelope HKDF/AES-256-GCM known-answer ciphertext;
+- RFC 9180 E1 X25519 and H1 P-256 HPKE KEM shared secret, key schedule,
+  AES-GCM seal/open, contextual AAD, and H1 owner grant signature;
 - publisher COSE Sig_structure and ownership-proof signature inputs;
 - RFC 9162 3-leaf Merkle tree root.
 
 Selected negative mutations test wrong transfer signature domains, corrupted
-signatures/transfer bodies, altered media-record AAD, wrong publisher
+signatures/transfer bodies, altered media-record/HPKE AAD, wrong publisher
 signature domains, and mutated Merkle leaves.
 
 **Evidence limits:** These are narrowly scoped known-answer probes, not a
-general CBOR parser, HPKE, R1 Argon2id, strict Ed25519 weak-key policy,
+general CBOR parser, production HPKE implementation, R1 Argon2id, strict Ed25519 weak-key policy,
 ownership-state transitions, package validator or 49-case implementation
 parity. In particular, `VerifyVectorSignature` must not be used for
 production authorization. Neither `PACKAGE_VALID` nor
