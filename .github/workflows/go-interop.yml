@@ -1,0 +1,35 @@
+name: Public Go interoperability
+
+on:
+  pull_request:
+    paths:
+      - "interop/go/**"
+      - "test-vectors/v0.2/ledger-state.json"
+      - "test-vectors/v0.2/crypto.json"
+      - ".github/workflows/go-interop.yml"
+  push:
+    branches: [main]
+    paths:
+      - "interop/go/**"
+      - "test-vectors/v0.2/ledger-state.json"
+      - "test-vectors/v0.2/crypto.json"
+      - ".github/workflows/go-interop.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  ledger-vectors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out public repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Verify independent Go probes
+        working-directory: interop/go
+        run: |
+          go version
+          go test -count=1 ./...
+          go vet ./...
