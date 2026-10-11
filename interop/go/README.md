@@ -3,6 +3,9 @@
 A standalone **standard-library-only** Go probe of the public MUSICPKG
 v0.2 vectors. It does not import or execute Rust or private-repository code.
 
+All Go implementation helpers live in `*_test.go` files. No importable
+cryptographic or ownership-verification API is published by this probe.
+
 From `interop/go` run:
 
 ```sh
