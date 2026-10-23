@@ -5,7 +5,7 @@
 ## Publication and authority
 
 - This repository owns the **published, versioned** MUSICPKG wire-format, verification and interoperability specifications, fixtures, reference-conformance interfaces, and their public explanatory material.
-- The private `hackelia-micrantha/musicpkg` repository owns unpublished engineering, security research, operational implementation and **staging**, but cannot silently redefine published public specifications. Review public contract/fixture changes as explicit versioned changes first.
+- The private `hackelia-micrantha/contentpkg` repository (renamed from `hackelia-micrantha/musicpkg`) owns unpublished engineering, security research, operational implementation and **staging**, but cannot silently redefine published public specifications. Review public contract/fixture changes as explicit versioned changes first.
 - [UPSTREAM.md](../UPSTREAM.md) records selective publication, source provenance, and Apache-2.0 (specs, documentation, fixtures) versus MPL-2.0 (reference implementation) licensing. Do not mirror unpublished implementation, credentials, research corpora, or private test material into this repository.
 - This contract's adoption does not authorize publication of a new protocol version, release, licensing change, or private-source transfer.
 
