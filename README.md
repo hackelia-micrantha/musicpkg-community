@@ -25,7 +25,7 @@ This repository is the public interoperability surface for MUSICPKG. A conformin
 - positive, negative, and product/failure test vectors;
 - public conformance tooling and reference-verifier interfaces.
 
-`hackelia-micrantha/musicpkg` remains the private canonical engineering repository for implementation, unpublished design work, security research, adversarial testing, operational tooling, and publication staging.
+`hackelia-micrantha/contentpkg` (renamed in place from `hackelia-micrantha/musicpkg`) is the private engineering monorepo for existing MUSICPKG implementation and unpublished CONTENTPKG/BOOKPKG work; this public repository remains the authoritative MUSICPKG v0.2 interoperability contract.
 
 Published contracts do not silently change to match an implementation. If implementation evidence exposes a specification defect, the public contract is revised explicitly and versioned.
 
