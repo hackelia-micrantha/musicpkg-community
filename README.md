@@ -61,6 +61,10 @@ MUSICPKG aims to provide durable offline ownership, owner-controlled recovery an
 
 It does **not** claim that a general-purpose endpoint can make plaintext or analog capture impossible. Watermarking is forensic evidence, not authorization.
 
+## Documentation maintenance
+
+This public interoperability project adopts the [Micrantha documentation-sync process](docs/documentation-maintenance.md). The project-local contract identifies the published-specification authority, selective private-to-public promotion limits, current conformance and Go interoperability gates, and claims that must not be presented as completed product capabilities.
+
 ## Relationship to the private repository
 
 This repository is deliberately curated rather than blindly mirrored. Public interoperability contracts and fixtures are promoted here after review; private operational data, attack tooling, unpublished experiments, and sensitive implementation details remain outside the public surface.
