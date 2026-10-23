@@ -4,7 +4,7 @@
 
 ## Initial v0.2 publication
 
-- Private canonical engineering repository: `hackelia-micrantha/musicpkg`
+- Private canonical engineering repository at original v0.2 publication: `hackelia-micrantha/musicpkg` (renamed in place to `hackelia-micrantha/contentpkg`; historical SHAs unchanged)
 - Reviewed source snapshot: `a79e60e7976cb635b8959b451dd7b017e075caff`
 - Published profile: MUSICPKG Working Draft v0.2
 - Public surface: product contract, architecture invariants, RFC, normative specs, CDDL, and conformance fixtures
